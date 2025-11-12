@@ -1,7 +1,31 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, {useState} from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
 const Login = () => {
+  const [values, setValues] = useState({
+    email: '',
+    password: ''
+  })
+
+  const nevigate = useNavigate()
+  
+  const handleChange = (event) => {
+    setValues({
+      ...values,
+      [event.target.name]: event.target.value
+    })
+  }
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    axios.post('http://localhost:3000/auth/adminlogin', values)
+    .then(result => {
+      nevigate('/dashboard')
+    })
+    .catch(err => console.error(err))
+  }
+
   return (
     <div 
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
@@ -14,7 +38,7 @@ const Login = () => {
       
       <div className="bg-white/80 backdrop-blur-lg p-8 rounded-lg shadow-lg w-96 relative z-10">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Log in to your Account!</h2>
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email:
@@ -22,6 +46,8 @@ const Login = () => {
             <input
               type="email"
               name="email"
+              value={values.email}
+              onChange={handleChange}
               autoComplete="off"
               placeholder="Enter Your Email"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -34,6 +60,8 @@ const Login = () => {
             <input
               type="password"
               name="password"
+              value={values.password}
+              onChange={handleChange}
               autoComplete="off"
               placeholder="Enter Your Password"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"

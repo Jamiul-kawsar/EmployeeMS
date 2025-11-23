@@ -1,14 +1,16 @@
 import React, {useState} from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import {motion} from 'framer-motion'
 
 const Login = () => {
   const [values, setValues] = useState({
     email: '',
     password: ''
   })
-
+  axios.defaults.withCredentials = true;
   const nevigate = useNavigate()
+  const [error, setError] = useState('')
   
   const handleChange = (event) => {
     setValues({
@@ -21,9 +23,18 @@ const Login = () => {
     event.preventDefault()
     axios.post('http://localhost:3000/auth/adminlogin', values)
     .then(result => {
-      nevigate('/dashboard')
+      if (result.data.loginStatus) {
+        nevigate('/dashboard')
+      }
+      else{
+        setError(result.data.error)
+      }
     })
-    .catch(err => console.error(err))
+    .catch(err => {
+      const msg = err.response?.data?.error || err.response?.data?.message || 'Login failed'
+      setError(msg)
+      console.error(err)
+    })
   }
 
   return (
@@ -36,7 +47,17 @@ const Login = () => {
       {/* Add an overlay div for better text visibility */}
       <div className="absolute inset-0 bg-black/50"></div>
       
-      <div className="bg-white/80 backdrop-blur-lg p-8 rounded-lg shadow-lg w-96 relative z-10">
+      <motion.div
+      
+        initial={{ opacity: 0, scale: 0.5, y: 0 }}   // Start position
+        animate={{ opacity: 1, scale: 1, y: 0 }}       // Animate to center
+        transition={{
+          duration: 1,
+          ease: "easeOut"
+        }}
+          
+      className="bg-white/80 backdrop-blur-lg p-8 rounded-lg shadow-lg w-96 relative z-10">
+        {error && <div className="mb-4 text-red-600 text-center">{error}</div>}
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Log in to your Account!</h2>
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
@@ -97,7 +118,7 @@ const Login = () => {
             </Link>
           </p>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
